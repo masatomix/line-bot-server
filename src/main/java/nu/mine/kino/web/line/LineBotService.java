@@ -14,7 +14,6 @@ package nu.mine.kino.web.line;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -46,7 +45,9 @@ public class LineBotService {
                 buffer.append("\n");
             }
 
+            System.out.println("------- body ------");
             System.out.println(buffer);
+            System.out.println("------- body ------");
 
         } catch (IOException e) {
             // TODO é©ìÆê∂ê¨Ç≥ÇÍÇΩ catch ÉuÉçÉbÉN

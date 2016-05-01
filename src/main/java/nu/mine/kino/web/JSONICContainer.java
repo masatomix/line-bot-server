@@ -12,6 +12,8 @@
 
 package nu.mine.kino.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 
@@ -45,6 +47,36 @@ public class JSONICContainer extends Container {
 
     @Override
     public Object getComponent(String className) throws Exception {
+
+        HttpServletRequest request = ExternalContext.getRequest();
+        try {
+            StringBuffer buffer = new StringBuffer();
+            BufferedReader reader = new BufferedReader(request.getReader());
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+                buffer.append("\n");
+            }
+
+            System.out.println("------- body ------");
+            System.out.println(buffer);
+            System.out.println("------- body ------");
+
+        } catch (IOException e) {
+            // TODO é©ìÆê∂ê¨Ç≥ÇÍÇΩ catch ÉuÉçÉbÉN
+            e.printStackTrace();
+        }
+
+        Enumeration headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String object = (String) headerNames.nextElement();
+            System.out.printf("[%s]: [%s]\n", object,
+                    request.getHeader(object));
+        }
+        
+        
+        
+        
         printheeader();
         Object component;
         try {
