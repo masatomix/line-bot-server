@@ -12,8 +12,6 @@
 
 package nu.mine.kino.web;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 
@@ -48,35 +46,33 @@ public class JSONICContainer extends Container {
     @Override
     public Object getComponent(String className) throws Exception {
 
-        HttpServletRequest request = ExternalContext.getRequest();
-        try {
-            StringBuffer buffer = new StringBuffer();
-            BufferedReader reader = new BufferedReader(request.getReader());
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line);
-                buffer.append("\n");
-            }
+        // HttpServletRequest request = ExternalContext.getRequest();
+        // try {
+        // StringBuffer buffer = new StringBuffer();
+        // BufferedReader reader = new BufferedReader(request.getReader());
+        // String line;
+        // while ((line = reader.readLine()) != null) {
+        // buffer.append(line);
+        // buffer.append("\n");
+        // }
+        //
+        // System.out.println("------- body ------");
+        // System.out.println(buffer);
+        // System.out.println("------- body ------");
+        //
+        // } catch (IOException e) {
+        // // TODO 自動生成された catch ブロック
+        // e.printStackTrace();
+        // }
+        //
+        // Enumeration headerNames = request.getHeaderNames();
+        // while (headerNames.hasMoreElements()) {
+        // String object = (String) headerNames.nextElement();
+        // System.out.printf("[%s]: [%s]\n", object,
+        // request.getHeader(object));
+        // }
+        //
 
-            System.out.println("------- body ------");
-            System.out.println(buffer);
-            System.out.println("------- body ------");
-
-        } catch (IOException e) {
-            // TODO 自動生成された catch ブロック
-            e.printStackTrace();
-        }
-
-        Enumeration headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String object = (String) headerNames.nextElement();
-            System.out.printf("[%s]: [%s]\n", object,
-                    request.getHeader(object));
-        }
-        
-        
-        
-        
         printheeader();
         Object component;
         try {
@@ -111,11 +107,14 @@ public class JSONICContainer extends Container {
     private void printheeader() {
         Enumeration<String> headerNames = ExternalContext.getRequest()
                 .getHeaderNames();
+        log.debug("----- header start.------");
         while (headerNames.hasMoreElements()) {
             String string = (String) headerNames.nextElement();
             String header = ExternalContext.getRequest().getHeader(string);
-            log.debug(string + ":::::::" + header);
+            String message = String.format("[%s]: [%s]", string, header);
+            log.debug(message);
         }
+        log.debug("----- header end.------");
     }
 
     @Override
