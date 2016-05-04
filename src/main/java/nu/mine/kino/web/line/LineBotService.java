@@ -14,23 +14,32 @@ package nu.mine.kino.web.line;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.linecorp.bot.client.LineBotClient;
 import com.linecorp.bot.client.LineBotClientBuilder;
 import com.linecorp.bot.client.exception.LineBotAPIException;
+import com.linecorp.bot.servlet.LineBotCallbackRequestParser;
 
+import lombok.extern.slf4j.Slf4j;
 import net.arnx.jsonic.JSON;
-import nu.mine.kino.web.line.models.Content;
+import nu.mine.kino.web.line.models.LineBotModel;
 import nu.mine.kino.web.line.models.MessageContent;
 import nu.mine.kino.web.line.models.OperationContent;
-import nu.mine.kino.web.line.models.LineBotModel;
 import nu.mine.kino.web.line.models.Result;
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_ID;
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_MID;
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_SECRET;
 
 /**
  * @author Masatomi KINO
- * @version $Revision: 530 $
+ * @version $Revision$
  */
+@Service
+@Slf4j
 public class LineBotService {
-
     public Object find(Map<String, String> params) {
         return params;
     }
@@ -42,6 +51,8 @@ public class LineBotService {
         for (Result result : results) {
             if (isReceivedMessage(result)) {
                 MessageContent content = createMessageContent(result);
+
+                // MessageContent の場合は、下記のフィールドがFROMのID
                 String from = content.getFrom();
                 String message = from + " さん、" + content.getText() + " って言った？";
                 client.sendText(from, message);
@@ -49,6 +60,7 @@ public class LineBotService {
 
             if (isReceivedOperation(result)) {
                 OperationContent content = createOperationContent(result);
+                // OperationContent の場合は、下記のパラメタがFROMのID
                 String from = content.getParams()[0]; // 追加の際にココの情報を保存しておけば、複数人にBroadcastできそう
                 String message = from + " さん登録ありがとうございます！";
                 client.sendText(from, message);
@@ -58,16 +70,9 @@ public class LineBotService {
     }
 
     private LineBotClient createClient() {
-        return LineBotClientBuilder.create("YOUR_CHANNEL_ID", "YOUR_CHANNEL_SECRET", "YOUR_CHANNEL_MID")
+        return LineBotClientBuilder
+                .create(YOUR_CHANNEL_ID, YOUR_CHANNEL_SECRET, YOUR_CHANNEL_MID)
                 .build();
-    }
-
-    private boolean isReceivedMessage(Result result) {
-        return result.getEventType().equals("138311609000106303");
-    }
-
-    private boolean isReceivedOperation(Result result) {
-        return result.getEventType().equals("138311609100106403");
     }
 
     private OperationContent createOperationContent(Result result) {
@@ -123,4 +128,38 @@ public class LineBotService {
     // }
     //
     // }
+
+    /**
+     * <pre>
+     * Values of the eventType property:
+     * Value   Description
+     * “138311609000106303”    Received message (example: text, images)
+     * “138311609100106403”    Received operation (example: added as friend)
+     * 
+     * https://developers.line.me/bot-api/getting-started-with-bot-api-trial
+     * </pre>
+     * 
+     * @param result
+     * @return
+     */
+    private boolean isReceivedMessage(Result result) {
+        return result.getEventType().equals("138311609000106303");
+    }
+
+    /**
+     * <pre>
+     * Values of the eventType property:
+     * Value   Description
+     * “138311609000106303”    Received message (example: text, images)
+     * “138311609100106403”    Received operation (example: added as friend)
+     * 
+     * https://developers.line.me/bot-api/getting-started-with-bot-api-trial
+     * </pre>
+     * 
+     * @param result
+     * @return
+     */
+    private boolean isReceivedOperation(Result result) {
+        return result.getEventType().equals("138311609100106403");
+    }
 }
