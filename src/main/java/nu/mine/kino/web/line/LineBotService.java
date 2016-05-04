@@ -12,16 +12,17 @@
 
 package nu.mine.kino.web.line;
 
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_ID;
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_MID;
+import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_SECRET;
+
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.linecorp.bot.client.LineBotClient;
 import com.linecorp.bot.client.LineBotClientBuilder;
 import com.linecorp.bot.client.exception.LineBotAPIException;
-import com.linecorp.bot.servlet.LineBotCallbackRequestParser;
 
 import lombok.extern.slf4j.Slf4j;
 import net.arnx.jsonic.JSON;
@@ -29,9 +30,6 @@ import nu.mine.kino.web.line.models.LineBotModel;
 import nu.mine.kino.web.line.models.MessageContent;
 import nu.mine.kino.web.line.models.OperationContent;
 import nu.mine.kino.web.line.models.Result;
-import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_ID;
-import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_MID;
-import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_SECRET;
 
 /**
  * @author Masatomi KINO
