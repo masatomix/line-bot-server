@@ -16,16 +16,21 @@ import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_ID;
 import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_MID;
 import static nu.mine.kino.web.line.Constants.YOUR_CHANNEL_SECRET;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.linecorp.bot.client.CloseableMessageContent;
 import com.linecorp.bot.client.LineBotClient;
 import com.linecorp.bot.client.LineBotClientBuilder;
 import com.linecorp.bot.client.exception.LineBotAPIException;
+import com.linecorp.bot.model.profile.UserProfileResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import net.arnx.jsonic.JSON;
+import nu.mine.kino.web.line.models.ContentType;
 import nu.mine.kino.web.line.models.LineBotModel;
 import nu.mine.kino.web.line.models.MessageContent;
 import nu.mine.kino.web.line.models.OperationContent;
@@ -38,9 +43,16 @@ import nu.mine.kino.web.line.models.Result;
 @Service
 @Slf4j
 public class LineBotService {
-    public Object find(Map<String, String> params) {
-        return params;
-    }
+    // public Object find(Map<String, String> params) {
+    // return params;
+    // }
+
+    // public void create(Map<String, Object> model) throws LineBotAPIException
+    // {
+    // log.debug("-------------");
+    // log.debug(JSON.encode(model, true));
+    // log.debug("-------------");
+    // }
 
     public void create(LineBotModel model) throws LineBotAPIException {
         LineBotClient client = createClient();
@@ -48,23 +60,76 @@ public class LineBotService {
 
         for (Result result : results) {
             if (isReceivedMessage(result)) {
-                MessageContent content = createMessageContent(result);
-
-                // MessageContent の場合は、下記のフィールドがFROMのID
-                String from = content.getFrom();
-                String message = from + " さん、" + content.getText() + " って言った？";
-                client.sendText(from, message);
+                executeContent(client, result);
             }
 
             if (isReceivedOperation(result)) {
-                OperationContent content = createOperationContent(result);
-                // OperationContent の場合は、下記のパラメタがFROMのID
-                String from = content.getParams()[0]; // 追加の際にココの情報を保存しておけば、複数人にBroadcastできそう
-                String message = from + " さん登録ありがとうございます！";
-                client.sendText(from, message);
+                executeOperation(client, result);
             }
 
         }
+    }
+
+    private void executeOperation(LineBotClient client, Result result)
+            throws LineBotAPIException {
+        OperationContent content = createOperationContent(result);
+        // OperationContent の場合は、下記のパラメタがFROMのID
+        String from = content.getParams()[0]; //
+        // 追加の際にココの情報を保存しておけば、複数人にBroadcastできそう
+        String message = from + " さん登録ありがとうございます！";
+        client.sendText(from, message);
+    }
+
+    private void executeContent(LineBotClient client, Result result)
+            throws LineBotAPIException {
+        MessageContent content = createMessageContent(result);
+
+        // MessageContent の場合は、下記のフィールドがFROMのID
+        String from = content.getFrom();
+        String messageId = content.getId();
+
+        Map<String, Object> contentMetaData = content.getContentMetadata();
+
+        String message = null;
+
+        ContentType contentType = content.getContentType();
+        switch (contentType) {
+        case TEXT:
+            message = from + " さん、\n" + content.getText() + " って言った？";
+            break;
+        case IMAGE:
+        case VIDEO:
+        case AUDIO:
+            CloseableMessageContent binaryContent = client
+                    .getMessageContent(messageId);
+            message = binaryContent.getFileName() + " をおくってくれた？";
+            break;
+        case LOCATION:
+            double lat = content.getLocation().getLatitude();
+            double longT = content.getLocation().getLongitude();
+            message = String.format("%s さん、\n" + "緯度: %s, 経度: %s" + " にいます？",
+                    from, lat, longT);
+            break;
+        case STICKER:
+            message = contentMetaData.toString();
+
+            break;
+        case CONTACT:
+            String displayName = (String) contentMetaData.get("displayName");
+            message = displayName + " さんの情報をおくってくれた？";
+            String mid = (String) contentMetaData.get("mid");
+            UserProfileResponse userProfile = client
+                    .getUserProfile(Arrays.asList(new String[] { mid }));
+
+            String encode = JSON.encode(userProfile,true);
+            log.debug(encode);
+            
+            break;
+        default:
+            message = from + " さん、\nこんにちは。";
+            break;
+        }
+        client.sendText(from, message);
     }
 
     private LineBotClient createClient() {

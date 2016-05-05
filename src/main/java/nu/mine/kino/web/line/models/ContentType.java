@@ -1,3 +1,5 @@
+package nu.mine.kino.web.line.models;
+
 /******************************************************************************
  * Copyright (c) 2010 Masatomi KINO and others. 
  * All rights reserved. This program and the accompanying materials
@@ -8,44 +10,44 @@
  *      Masatomi KINO - initial API and implementation
  * $Id$
  ******************************************************************************/
-//çÏê¨ì˙: 2016/05/03
-
-package nu.mine.kino.web.line.models;
-
-import java.util.Date;
-import java.util.Map;
-
-import lombok.Data;
+//çÏê¨ì˙: 2016/05/04
 
 /**
  * @author Masatomi KINO
  * @version $Revision$
  */
-@Data
-public class MessageContent implements Content {
+public enum ContentType {
 
-    // private ContentMetadata contentMetadata;
-    private Map<String, Object> contentMetadata;
+    NONE_0,
 
-    // private int contentType;
-    private ContentType contentType;
+    TEXT,
 
-    private Date createdTime;
+    IMAGE,
 
-    private Date deliveredTime;
+    VIDEO,
 
-    private String from;
+    AUDIO,
 
-    private String id;
+    NONE_5,
 
-    private Location location;
+    NONE_6,
 
-    private String seq;
+    LOCATION,
 
-    private String text;
+    STICKER,
 
-    private String[] to;
+    NONE_9,
 
-    private int toType;
+    CONTACT,
+
+    // NONE_11,
+    //
+    // RICH_MESSAGE,
+
+    ;
+
+    public int getTypeCode() {
+        return this.ordinal();
+    }
 
 }
